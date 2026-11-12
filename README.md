@@ -8,7 +8,7 @@ A small todo list for the Omarchy bar.
 - Completed todos sink to the bottom of the list in a dimmed, struck-through style.
 - Filter by tag, or use **Done** to see only completed todos.
 - **Clear done** deletes every completed todo in one click.
-- Tags are yours: create them, pick a color-free name, and delete them. Omarchy
+- Tags are yours: create them, give them a name, and delete them. Omarchy
   starts with `work` and `personal`. Colors are assigned automatically and stay
   stable for a given name.
 - The bar icon shows the number of open todos. Right-click it (or use the
