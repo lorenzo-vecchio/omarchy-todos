@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.lorenzo-vecchio.todos",
+  "name": "Todos",
+  "version": "1.0.0",
+  "author": "Lorenzo Vecchio",
+  "license": "MIT",
+  "description": "A small todo list on the Omarchy bar: title only by default, with optional date, description, and colored tags.",
+  "homepage": "https://github.com/lorenzo-vecchio/omarchy-todos",
+  "repository": "https://github.com/lorenzo-vecchio/omarchy-todos",
+  "keywords": [
+    "todo",
+    "tasks",
+    "productivity",
+    "tags",
+    "bar"
+  ],
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Todos",
+    "description": "Track todos with optional dates, descriptions, and colored tags",
+    "category": "Productivity",
+    "aliases": [
+      "todo",
+      "tasks"
+    ],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "countMode": "total"
+    },
+    "schema": [
+      {
+        "key": "countMode",
+        "type": "enum",
+        "label": "Bar count",
+        "options": [
+          {
+            "value": "total",
+            "label": "Total open todos"
+          },
+          {
+            "value": "due",
+            "label": "Todos due today"
+          }
+        ],
+        "defaultValue": "total",
+        "description": "What the number beside the bar icon counts. You can also right-click the icon or use the button in the panel header to switch."
+      }
+    ]
+  }
+}
