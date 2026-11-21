@@ -26,6 +26,7 @@ Panel {
   property string tagFilter: ""
   property bool doneOnly: false
   property bool tagsOpen: false
+  property bool newTagOpen: false
   property string pendingTagDelete: ""
   property bool detailsOpen: false
   property string editingId: ""
@@ -245,7 +246,25 @@ Panel {
       return
     }
     if (!Model.hasTagEntry(root.tags, tag)) root.persist(root.todos, root.tags.concat([tag]))
+    root.closeNewTag()
+  }
+
+  function openNewTag() {
+    root.pendingTagDelete = ""
+    root.newTagOpen = true
+    Qt.callLater(function() { newTagField.forceActiveFocus() })
+  }
+
+  function closeNewTag() {
+    root.newTagOpen = false
     newTagField.text = ""
+    keyCatcher.forceActiveFocus()
+  }
+
+  function closeTags() {
+    root.tagsOpen = false
+    root.pendingTagDelete = ""
+    root.closeNewTag()
   }
 
   function deleteTag(tag) {
@@ -290,7 +309,10 @@ Panel {
     root.clockTick++
     root.editingId = ""
     root.detailsOpen = false
+    root.tagsOpen = false
     root.pendingTagDelete = ""
+    root.newTagOpen = false
+    newTagField.text = ""
     root.addDateInvalid = false
     root.editDateInvalid = false
     storeFile.reload()
@@ -357,7 +379,9 @@ Panel {
       anchors.fill: parent
       focus: true
       Keys.onEscapePressed: function(event) {
-        if (root.editingId !== "") root.cancelEdit()
+        if (root.newTagOpen) root.closeNewTag()
+        else if (root.tagsOpen) root.closeTags()
+        else if (root.editingId !== "") root.cancelEdit()
         else if (root.detailsOpen) root.detailsOpen = false
         else root.close()
         event.accepted = true
@@ -410,10 +434,19 @@ Panel {
             }
           }
 
+          PanelSeparator { foreground: root.foreground }
+
           Column {
             width: parent.width
             spacing: Style.space(8)
             visible: root.editingId === ""
+
+            PanelSectionHeader {
+              width: parent.width
+              text: strings.t("section.add")
+              foreground: root.foreground
+              fontFamily: root.fontFamily
+            }
 
             RowLayout {
               width: parent.width
@@ -696,174 +729,241 @@ Panel {
             }
           }
 
-          Flow {
-            width: parent.width
-            spacing: Style.space(4)
-
-            FilterChip {
-              label: strings.t("filter.all")
-              tint: root.foreground
-              active: root.tagFilter === "" && !root.doneOnly
-              onClicked: root.clearFilters()
-            }
-
-            FilterChip {
-              label: root.doneCount > 0
-                ? strings.t("filter.doneCount").arg(Commons.I18n.formatNumber(root.doneCount))
-                : strings.t("filter.done")
-              tint: root.accent
-              active: root.doneOnly
-              onClicked: root.setDoneFilter()
-            }
-
-            Repeater {
-              model: root.tags
-
-              FilterChip {
-                label: modelData
-                tint: root.tagColor(modelData)
-                active: !root.doneOnly && Model.tagKey(root.tagFilter) === Model.tagKey(modelData)
-                onClicked: root.setTagFilter(modelData)
-              }
-            }
-
-            FilterChip {
-              label: strings.t("tags.manage")
-              tint: root.dim
-              active: root.tagsOpen
-              onClicked: {
-                root.tagsOpen = !root.tagsOpen
-                if (!root.tagsOpen) root.pendingTagDelete = ""
-              }
-            }
-          }
-
-          RowLayout {
-            width: parent.width
-            visible: root.doneCount > 0
-            spacing: Style.space(6)
-
-            Item { Layout.fillWidth: true }
-
-            Button {
-              text: strings.t("done.clear").arg(Commons.I18n.formatNumber(root.doneCount))
-              tooltipText: strings.t("done.clearTooltip")
-              bordered: true
-              foreground: root.urgent
-              fontFamily: root.fontFamily
-              fontSize: Style.font.caption
-              horizontalPadding: Style.space(8)
-              onClicked: root.clearDone()
-            }
-          }
+          PanelSeparator { foreground: root.foreground }
 
           Column {
             width: parent.width
-            spacing: Style.space(6)
-            visible: root.tagsOpen
-
-            PanelSectionHeader {
-              width: parent.width
-              text: strings.t("tags.title")
-              foreground: root.foreground
-              fontFamily: root.fontFamily
-            }
+            spacing: Style.space(8)
 
             RowLayout {
               width: parent.width
               spacing: Style.space(6)
 
-              TextField {
-                id: newTagField
+              PanelSectionHeader {
                 Layout.fillWidth: true
-                placeholderText: strings.t("tags.addPlaceholder")
+                text: strings.t("section.list")
                 foreground: root.foreground
-                font.family: root.fontFamily
-                onAccepted: root.createTag()
+                fontFamily: root.fontFamily
               }
 
               Button {
-                text: strings.t("tags.add")
+                visible: root.doneCount > 0
+                text: strings.t("done.clear").arg(Commons.I18n.formatNumber(root.doneCount))
+                tooltipText: strings.t("done.clearTooltip")
                 bordered: true
-                foreground: root.foreground
+                foreground: root.urgent
                 fontFamily: root.fontFamily
-                onClicked: root.createTag()
+                fontSize: Style.font.caption
+                horizontalPadding: Style.space(8)
+                onClicked: root.clearDone()
               }
             }
 
             Flow {
               width: parent.width
               spacing: Style.space(4)
-              visible: root.tags.length > 0
+
+              FilterChip {
+                label: strings.t("filter.all")
+                tint: root.foreground
+                active: root.tagFilter === "" && !root.doneOnly
+                onClicked: root.clearFilters()
+              }
+
+              FilterChip {
+                label: root.doneCount > 0
+                  ? strings.t("filter.doneCount").arg(Commons.I18n.formatNumber(root.doneCount))
+                  : strings.t("filter.done")
+                tint: root.accent
+                active: root.doneOnly
+                onClicked: root.setDoneFilter()
+              }
 
               Repeater {
                 model: root.tags
 
-                Row {
-                  spacing: Style.space(2)
+                FilterChip {
+                  label: modelData
+                  tint: root.tagColor(modelData)
+                  active: !root.doneOnly && Model.tagKey(root.tagFilter) === Model.tagKey(modelData)
+                  onClicked: root.setTagFilter(modelData)
+                }
+              }
 
-                  TagPill {
-                    label: modelData
-                    tint: root.tagColor(modelData)
-                  }
-
-                  Button {
-                    text: "󰅖"
-                    tooltipText: strings.t("tags.delete")
-                    bordered: false
-                    foreground: root.dim
-                    fontFamily: root.fontFamily
-                    fontSize: Style.font.bodySmall
-                    horizontalPadding: Style.space(3)
-                    verticalPadding: Style.space(1)
-                    onClicked: root.pendingTagDelete = modelData
+              FilterChip {
+                label: strings.t("tags.manage")
+                tint: root.dim
+                active: root.tagsOpen
+                onClicked: {
+                  if (root.tagsOpen) root.closeTags()
+                  else {
+                    root.tagsOpen = true
+                    root.pendingTagDelete = ""
                   }
                 }
               }
             }
+          }
 
-            Text {
-              width: parent.width
-              visible: root.tags.length === 0
-              textFormat: Text.PlainText
-              text: strings.t("tags.empty")
-              color: root.dim
-              font.family: root.fontFamily
-              font.pixelSize: Style.font.caption
-            }
+          Rectangle {
+            width: parent.width
+            height: tagManager.implicitHeight + Style.space(20)
+            visible: root.tagsOpen
+            radius: Style.cornerRadius
+            color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.05)
+            border.width: 1
+            border.color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.14)
 
             Column {
-              width: parent.width
-              spacing: Style.space(4)
-              visible: root.pendingTagDelete !== ""
+              id: tagManager
+              anchors.left: parent.left
+              anchors.right: parent.right
+              anchors.top: parent.top
+              anchors.margins: Style.space(10)
+              spacing: Style.space(8)
 
-              Text {
+              RowLayout {
                 width: parent.width
-                textFormat: Text.PlainText
-                text: strings.t("tags.deleteConfirm").arg(root.pendingTagDelete)
-                color: root.foreground
-                font.family: root.fontFamily
-                font.pixelSize: Style.font.caption
-                wrapMode: Text.WordWrap
-              }
-
-              Row {
                 spacing: Style.space(6)
 
-                Button {
-                  text: strings.t("tags.deleteAction")
-                  bordered: false
-                  foreground: root.urgent
+                PanelSectionHeader {
+                  Layout.fillWidth: true
+                  text: strings.t("tags.title")
+                  foreground: root.foreground
                   fontFamily: root.fontFamily
-                  onClicked: root.deleteTag(root.pendingTagDelete)
                 }
 
                 Button {
-                  text: strings.t("edit.cancel")
+                  text: "󰅖"
+                  tooltipText: strings.t("tags.close")
                   bordered: false
                   foreground: root.dim
                   fontFamily: root.fontFamily
-                  onClicked: root.pendingTagDelete = ""
+                  horizontalPadding: Style.space(4)
+                  verticalPadding: Style.space(1)
+                  onClicked: root.closeTags()
+                }
+              }
+
+              Button {
+                visible: !root.newTagOpen
+                text: strings.t("tags.new")
+                iconText: "󰐕"
+                bordered: true
+                foreground: root.foreground
+                fontFamily: root.fontFamily
+                fontSize: Style.font.caption
+                horizontalPadding: Style.space(8)
+                onClicked: root.openNewTag()
+              }
+
+              RowLayout {
+                width: parent.width
+                spacing: Style.space(6)
+                visible: root.newTagOpen
+
+                TextField {
+                  id: newTagField
+                  Layout.fillWidth: true
+                  placeholderText: strings.t("tags.addPlaceholder")
+                  foreground: root.foreground
+                  font.family: root.fontFamily
+                  onAccepted: root.createTag()
+                }
+
+                Button {
+                  text: strings.t("tags.add")
+                  bordered: true
+                  foreground: root.foreground
+                  fontFamily: root.fontFamily
+                  onClicked: root.createTag()
+                }
+
+                Button {
+                  iconText: "󰅖"
+                  tooltipText: strings.t("tags.closeField")
+                  bordered: false
+                  foreground: root.dim
+                  fontFamily: root.fontFamily
+                  horizontalPadding: Style.space(4)
+                  onClicked: root.closeNewTag()
+                }
+              }
+
+              Flow {
+                width: parent.width
+                spacing: Style.space(4)
+                visible: root.tags.length > 0
+
+                Repeater {
+                  model: root.tags
+
+                  Row {
+                    spacing: Style.space(2)
+
+                    TagPill {
+                      label: modelData
+                      tint: root.tagColor(modelData)
+                    }
+
+                    Button {
+                      text: "󰅖"
+                      tooltipText: strings.t("tags.delete")
+                      bordered: false
+                      foreground: root.dim
+                      fontFamily: root.fontFamily
+                      fontSize: Style.font.bodySmall
+                      horizontalPadding: Style.space(3)
+                      verticalPadding: Style.space(1)
+                      onClicked: root.pendingTagDelete = modelData
+                    }
+                  }
+                }
+              }
+
+              Text {
+                width: parent.width
+                visible: root.tags.length === 0
+                textFormat: Text.PlainText
+                text: strings.t("tags.empty")
+                color: root.dim
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+              }
+
+              Column {
+                width: parent.width
+                spacing: Style.space(4)
+                visible: root.pendingTagDelete !== ""
+
+                Text {
+                  width: parent.width
+                  textFormat: Text.PlainText
+                  text: strings.t("tags.deleteConfirm").arg(root.pendingTagDelete)
+                  color: root.foreground
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                  wrapMode: Text.WordWrap
+                }
+
+                Row {
+                  spacing: Style.space(6)
+
+                  Button {
+                    text: strings.t("tags.deleteAction")
+                    bordered: false
+                    foreground: root.urgent
+                    fontFamily: root.fontFamily
+                    onClicked: root.deleteTag(root.pendingTagDelete)
+                  }
+
+                  Button {
+                    text: strings.t("edit.cancel")
+                    bordered: false
+                    foreground: root.dim
+                    fontFamily: root.fontFamily
+                    onClicked: root.pendingTagDelete = ""
+                  }
                 }
               }
             }

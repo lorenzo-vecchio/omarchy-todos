@@ -20,7 +20,7 @@ Before submitting, confirm the ID is still unused in
 - [x] Root `LICENSE`
 - [x] No build step, package install, or external dependency
 - [x] `preview.png` at the repository root
-- [x] Final version in `manifest.json` (`1.0.0`)
+- [x] Final version in `manifest.json` (`1.1.0`)
 
 ## Issue body
 

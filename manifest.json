@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.lorenzo-vecchio.todos",
   "name": "Todos",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Lorenzo Vecchio",
   "license": "MIT",
   "description": "A small todo list on the Omarchy bar: title only by default, with optional date, description, and colored tags.",

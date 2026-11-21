@@ -2,8 +2,12 @@
 
 A small todo list for the Omarchy bar.
 
+![Todos panel](preview.png)
+
 - A todo is just a title by default.
-- Optionally give it a due date, a description, and a tag.
+- The panel keeps creation and browsing apart: **New todo** sits above a
+  divider, and the **Todo list** with its filters starts below it.
+- Optionally give a todo a due date, a description, and a tag.
 - Todos due today are pinned in their own section above the rest of the list.
 - Completed todos sink to the bottom of the list in a dimmed, struck-through style.
 - Filter by tag, or use **Done** to see only completed todos.
@@ -39,11 +43,14 @@ shell.
 - Click a tag chip to filter; click **All** to clear the filter. Click **Done**
   to list only completed todos.
 - Click **Clear done (n)** to delete every completed todo.
-- Click **Tags** to open the tag manager. Add a tag with the **New tag** field;
-  click the `×` beside a tag to delete it. Deleting a tag also clears it from
+- Click **Tags** to open the tag manager. Click **New tag** to reveal the input
+  field, then press Enter or **Add**; the field closes as soon as the tag is
+  created. Press Escape or the `×` beside the field to close it without adding
+  anything, and the `×` in the manager header (or Escape) to close the manager.
+  Click the `×` beside a tag to delete it; deleting a tag also clears it from
   every todo that used it. Typing a new tag on a todo adds it to your tags.
 - Escape closes the panel. When a field is focused, Escape first leaves the
-  edit form, the tag manager, or the optional details.
+  new tag field, the tag manager, the edit form, or the optional details.
 - Right-click the bar icon to switch its count between all open todos and
   todos due today. The panel header has the same switch.
 
@@ -54,6 +61,12 @@ omarchy-shell io.github.lorenzo-vecchio.todos toggle
 omarchy-shell io.github.lorenzo-vecchio.todos open
 omarchy-shell io.github.lorenzo-vecchio.todos close
 ```
+
+## Screenshots
+
+| Panel | Optional details | Tag manager |
+|-------|------------------|-------------|
+| ![Todos panel](preview.png) | ![Details expanded](docs/details.png) | ![New tag field](docs/tags.png) |
 
 ## Configure
 
